@@ -55,10 +55,34 @@ public class UserController {
             它表示浏览器本次提交上来的所有内容
          */
         //通过request对象获取表单中4个输入框的内容
+        /*
+            当我们通过request获取来自浏览器提交过来的参数时
+            如果:
+                request.getParameter("username")返回值为null
+                则说明浏览器没有提交名为username的参数
+
+                request.getParameter("username")返回值为""(空字符串)
+                则说明浏览器提交的参数username没有值
+         */
         String username = request.getParameter("username");//这里的username就是reg.html上用户名输入框的名字(name属性指定的)
         String password = request.getParameter("password");
         String nickname = request.getParameter("nickname");
         String ageStr = request.getParameter("age");
+        //注册信息的必要性验证
+        if(username==null||username.trim().isEmpty()||
+           password==null||password.trim().isEmpty()||
+           nickname==null||nickname.trim().isEmpty()||
+           ageStr==null||ageStr.trim().isEmpty()||
+           !ageStr.matches("[0-9]+")){
+            //响应错误页面
+            try {
+                response.sendRedirect("/reg_info_error.html");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+
         System.out.println(username+","+password+","+nickname+","+ageStr);
 
         int age = Integer.parseInt(ageStr);
@@ -66,9 +90,14 @@ public class UserController {
         User user = new User(username,password,nickname,age);
         //参数1:userDir表示父目录 参数2:userDir目录下的子项
         File file = new File(userDir,username+".obj");
-        if (username == null || username.trim().isEmpty()
-            password
-        )
+        if(file.exists()){
+            try {
+                response.sendRedirect("/have_user.html");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
         try (
                 FileOutputStream fos = new FileOutputStream(file);
                 ObjectOutputStream oos = new ObjectOutputStream(fos);
