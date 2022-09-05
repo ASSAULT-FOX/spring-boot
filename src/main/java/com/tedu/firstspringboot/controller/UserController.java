@@ -6,10 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 
 /**
  * 使用当前类处理所有与用户相关的业务操作
@@ -112,4 +109,46 @@ public class UserController {
 
     }
 
+    @RequestMapping("/loginUser")
+    public void login(HttpServletRequest request, HttpServletResponse response){
+        System.out.println("开始处理登录!!!");
+        String username = request.getParameter("username");
+        String password = request.getParameter("password");
+        System.out.println(username+","+password);
+        //必要的验证工作
+        if(username==null||username.trim().isEmpty()||
+           password==null||password.trim().isEmpty()){
+            try {
+                response.sendRedirect("login_info_error.html");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return;
+        }
+
+        File file = new File(userDir,username+".obj");
+        if(file.exists()){//用户名是否存在(是否为一个注册用户)
+            try (
+                    FileInputStream fis = new FileInputStream(file);
+                    ObjectInputStream ois = new ObjectInputStream(fis);
+            ){
+                User user = (User)ois.readObject();//读取回来的是注册用户信息
+                //比较登录的密码和该注册用户的密码是否一致
+                if(user.getPassword().equals(password)){
+                    //登录成功
+                    response.sendRedirect("/login_success.html");
+                    return;
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+
+        //登录失败
+        try {
+            response.sendRedirect("/login_fail.html");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
