@@ -90,7 +90,7 @@ public class UserController {
         User user = new User(username,password,nickname,age);
         //参数1:userDir表示父目录 参数2:userDir目录下的子项
         File file = new File(userDir,username+".obj");
-        if(file.exists()){
+        if(file.exists()){//文件存在则说明该用户已经注册过了
             try {
                 response.sendRedirect("/have_user.html");
             } catch (IOException e) {
